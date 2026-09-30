@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediaPipe Pose Model Tester (33 Landmarks)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- MediaPipe Libraries from jsdelivr -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4.1675466862/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.6.1675466023/control_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1675466124/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/pose.js" crossorigin="anonymous"></script>
+
+  <style>:root{--bg-dark:#090d16;--bg-card:#0f172abf;--border-card:#ffffff14;--accent-cyan:#06b6d4;--accent-blue:#3b82f6;--accent-green:#10b981;--accent-purple:#8b5cf6;--text-main:#f8fafc;--text-sub:#94a3b8}*{box-sizing:border-box;margin:0;padding:0}body{color:var(--text-main);background:radial-gradient(circle at 50% 0,#1e1b4b 0%,#090d16 70%);min-height:100vh;padding-bottom:2rem;font-family:Prompt,-apple-system,sans-serif;overflow-x:hidden}.num-font{font-family:Chakra Petch,monospace}header{border-bottom:1px solid var(--border-card);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);z-index:50;background:#090d16d9;justify-content:space-between;align-items:center;padding:1rem 2rem;display:flex;position:sticky;top:0}.logo-badge{align-items:center;gap:.75rem;display:flex}.logo-badge h1{background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-text-fill-color:transparent;-webkit-background-clip:text;font-size:1.25rem;font-weight:700}.status-pill{color:#34d399;background:#10b9811f;border:1px solid #10b9814d;border-radius:9999px;align-items:center;gap:.5rem;padding:.35rem .85rem;font-size:.8rem;font-weight:600;display:inline-flex}.status-dot{background:#10b981;border-radius:50%;width:8px;height:8px;animation:1.5s infinite pulse;box-shadow:0 0 10px #10b981}@keyframes pulse{0%,to{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.85)}}.main-grid{grid-template-columns:1fr 420px;gap:1.5rem;max-width:1680px;margin:0 auto;padding:1.25rem 2rem;display:grid}@media (width<=1024px){.main-grid{grid-template-columns:1fr;padding:1rem}}.viewport-card{border:1px solid var(--border-card);aspect-ratio:16/9;background:#000;border-radius:20px;justify-content:center;align-items:center;display:flex;position:relative;overflow:hidden;box-shadow:0 20px 40px -15px #000c}#webcam-video{display:none}#output-canvas{object-fit:cover;width:100%;height:100%;transform:none}.canvas-overlay-ui{pointer-events:none;flex-direction:column;justify-content:space-between;padding:1rem;display:flex;position:absolute;inset:0}.overlay-top{justify-content:space-between;align-items:flex-start;gap:.5rem;display:flex}.hud-badge-group{flex-wrap:wrap;gap:.5rem;display:flex}.stat-badge{-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);background:#0f172ad9;border:1px solid #ffffff1f;border-radius:10px;flex-direction:column;padding:.45rem .8rem;display:flex}.stat-badge .label{color:var(--text-sub);text-transform:uppercase;letter-spacing:.05em;font-size:.65rem}.stat-badge .val{color:#38bdf8;font-size:1.15rem;font-weight:700}.banner-status{color:#e2e8f0;text-align:center;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);background:#0f172ae6;border:1px solid #ffffff26;border-radius:9999px;align-self:center;padding:.6rem 1.4rem;font-size:.95rem;font-weight:600;box-shadow:0 10px 25px #00000080}.banner-status.active{color:#fff;background:#10b981e6;border-color:#0000;box-shadow:0 10px 25px #10b98166}.loading-spinner-box{z-index:20;background:#090d16f5;flex-direction:column;justify-content:center;align-items:center;gap:1rem;padding:2rem;display:flex;position:absolute;inset:0}.spinner{border:4px solid #ffffff1a;border-top-color:#38bdf8;border-radius:50%;width:48px;height:48px;animation:.8s linear infinite spin}@keyframes spin{to{transform:rotate(360deg)}}.sidebar{flex-direction:column;gap:1rem;display:flex}.card{background:var(--bg-card);border:1px solid var(--border-card);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-radius:16px;padding:1.15rem}.card h3{color:#cbd5e1;align-items:center;gap:.5rem;margin-bottom:.75rem;font-size:.92rem;font-weight:600;display:flex}.source-btn-grid{grid-template-columns:1fr 1fr;gap:.5rem;display:grid}.source-btn{color:var(--text-sub);cursor:pointer;background:#ffffff0d;border:1px solid #ffffff1a;border-radius:10px;justify-content:center;align-items:center;gap:.4rem;padding:.65rem .5rem;font-family:inherit;font-size:.82rem;font-weight:500;transition:all .2s;display:flex}.source-btn:hover{color:#fff;background:#ffffff1f}.source-btn.active{color:#38bdf8;background:linear-gradient(135deg,#0ea5e940,#818cf840);border-color:#38bdf8;font-weight:600}.action-btn{cursor:pointer;border:none;border-radius:10px;justify-content:center;align-items:center;gap:.5rem;width:100%;padding:.65rem 1rem;font-family:inherit;font-size:.88rem;font-weight:600;transition:all .2s;display:flex}.btn-primary{color:#fff;background:linear-gradient(135deg,#0ea5e9,#6366f1);box-shadow:0 4px 15px #0ea5e959}.btn-primary:hover{opacity:.92}.btn-secondary{color:#cbd5e1;background:#ffffff14;border:1px solid #ffffff1f}.btn-secondary:hover{color:#fff;background:#ffffff26}.toggle-row{color:var(--text-sub);border-bottom:1px solid #ffffff0d;justify-content:space-between;align-items:center;padding:.45rem 0;font-size:.84rem;display:flex}.toggle-row:last-child{border-bottom:none}.switch{width:38px;height:22px;display:inline-block;position:relative}.switch input{opacity:0;width:0;height:0}.slider{cursor:pointer;background-color:#ffffff26;border-radius:22px;transition:all .3s;position:absolute;inset:0}.slider:before{content:"";background-color:#fff;border-radius:50%;width:16px;height:16px;transition:all .3s;position:absolute;bottom:3px;left:3px}input:checked+.slider{background-color:var(--accent-cyan)}input:checked+.slider:before{transform:translate(16px)}.landmarks-table-container{background:#0000004d;border:1px solid #ffffff0f;border-radius:8px;max-height:260px;overflow-y:auto}.landmarks-table{border-collapse:collapse;text-align:left;width:100%;font-size:.75rem}.landmarks-table th{color:#94a3b8;background:#0f172af2;border-bottom:1px solid #ffffff1a;padding:.4rem .6rem;position:sticky;top:0}.landmarks-table td{color:#cbd5e1;border-bottom:1px solid #ffffff0a;padding:.35rem .6rem}.landmarks-table tr:hover{background:#ffffff0a}</style>
+  <script type="module" crossorigin src="./assets/index-BERpChwu.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="logo-badge">
+      <span style="font-size: 1.6rem;">🦴</span>
+      <div>
+        <h1>Google MediaPipe Pose Tester</h1>
+        <p style="font-size: 0.75rem; color: var(--text-sub);">ทดสอบโมเดลตรวจจับจุดข้อต่อร่างกายมนุษย์ (33 Landmarks 3D)</p>
+      </div>
+    </div>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <div class="status-pill" id="engine-status">
+        <span class="status-dot"></span>
+        <span id="status-text">โมเดล MediaPipe กำลังเริ่มต้น...</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-grid">
+    <!-- Center: Video Viewport -->
+    <div>
+      <div class="viewport-card">
+        <video id="webcam-video" playsinline muted loop crossorigin="anonymous"></video>
+        <canvas id="output-canvas"></canvas>
+
+        <!-- Loading Box -->
+        <div class="loading-spinner-box" id="loading-box">
+          <div class="spinner" id="spinner-icon"></div>
+          <div style="font-weight: 700; color: #f8fafc; font-size: 1.15rem; text-align: center;" id="loading-title">
+            กำลังโหลดโมเดล MediaPipe Pose (33 จุด)...
+          </div>
+          <p style="font-size: 0.85rem; color: #94a3b8;" id="loading-desc">คอมไพล์ WebAssembly รันบนเบราว์เซอร์สด</p>
+        </div>
+
+        <!-- In-Canvas HUD Overlay -->
+        <div class="canvas-overlay-ui">
+          <div class="overlay-top">
+            <div class="hud-badge-group">
+              <div class="stat-badge">
+                <span class="label">FPS</span>
+                <span class="val num-font" id="fps-val">--</span>
+              </div>
+              <div class="stat-badge">
+                <span class="label">ตรวจจับจุด</span>
+                <span class="val num-font" id="landmarks-count">0 / 33</span>
+              </div>
+              <div class="stat-badge">
+                <span class="label">ความมั่นใจเฉลี่ย</span>
+                <span class="val num-font" id="confidence-val" style="color: #34d399;">--%</span>
+              </div>
+            </div>
+
+            <div class="stat-badge" style="background: rgba(0,0,0,0.65);">
+              <span class="label">ความละเอียดภาพ</span>
+              <span class="val num-font" id="resolution-val" style="font-size: 0.95rem; color: #a5b4fc;">-- x --</span>
+            </div>
+          </div>
+
+          <div class="banner-status" id="banner-status">
+            กำลังสแกนค้นหาร่างกายมนุษย์ในเฟรมภาพ...
+          </div>
+
+          <div></div>
+        </div>
+      </div>
+
+      <!-- Video Source Switcher below camera -->
+      <div class="card" style="margin-top: 1rem; padding: 0.85rem 1.25rem;">
+        <h4 style="font-size: 0.85rem; color: #38bdf8; margin-bottom: 0.4rem;">🎬 แหล่งสัญญาณภาพสำหรับทดสอบ (Video Source)</h4>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="source-btn active" id="btn-src-camera">📷 เปิดกล้อง (Camera)</button>
+          <button class="source-btn" id="btn-switch-camera">🔄 สลับกล้องหน้า/หลัง</button>
+          <button class="source-btn" id="btn-src-sample">🎥 วิดีโอตัวอย่าง (Sample)</button>
+          <button class="source-btn" id="btn-src-upload">📁 อัปโหลดวิดีโอจากเครื่อง</button>
+        </div>
+        <input type="file" id="video-file-input" accept="video/*" style="display: none;">
+      </div>
+    </div>
+
+    <!-- Right Sidebar: Model Controls & Live Inspector -->
+    <div class="sidebar">
+
+      <!-- Model Overlays & Controls -->
+      <div class="card">
+        <h3>⚙️ การแสดงผลโมเดล (Visual Overlays)</h3>
+        
+        <div class="toggle-row">
+          <span>วาดเส้นโครงกระดูก (Connectors)</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-connections" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <span>วาดจุดข้อต่อ (33 Landmark Dots)</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-dots" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <span>แสดงหมายเลขจุด Index (0 - 32)</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-indices">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <span>กลับด้านภาพแนวนอน (Mirror Mode)</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-mirror" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; margin-top: 0.85rem;">
+          <button class="action-btn btn-primary" id="btn-pause-resume" style="flex: 1;">
+            <span>⏸️</span> <span id="btn-pause-text">หยุดชั่วคราว</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Model Tuning Parameters -->
+      <div class="card">
+        <h3>🎛️ พารามิเตอร์โมเดล (Model Complexity)</h3>
+        
+        <div style="display: flex; gap: 0.4rem; margin-bottom: 0.75rem;">
+          <button class="source-btn active" id="btn-comp-0" style="flex: 1; padding: 0.45rem;">Lite (เร็วสุด)</button>
+          <button class="source-btn" id="btn-comp-1" style="flex: 1; padding: 0.45rem;">Full (มาตรฐาน)</button>
+        </div>
+
+        <div style="font-size: 0.75rem; color: #94a3b8; line-height: 1.5; background: rgba(0,0,0,0.3); padding: 0.6rem; border-radius: 8px;">
+          💡 <strong>MediaPipe Pose 33 จุด:</strong><br>
+          ครอบคลุมจุดสำคัญครบทุกข้อต่อ: จมูก, ไหล่, ศอก, ข้อมือ, นิ้วมือ, สะโพก, เข่า, ข้อเท้า, ส้นเท้า และปลายนิ้วเท้า พร้อมพิกัดแกน Z (Depth)
+        </div>
+      </div>
+
+      <!-- Realtime 33 Landmarks Inspector -->
+      <div class="card">
+        <h3>📍 ตารางพิกัดข้อต่อสด (Landmarks Inspector)</h3>
+        <div class="landmarks-table-container">
+          <table class="landmarks-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>ข้อต่อ (Joint)</th>
+                <th>X</th>
+                <th>Y</th>
+                <th>Z (Depth)</th>
+                <th>Vis.</th>
+              </tr>
+            </thead>
+            <tbody id="landmarks-tbody">
+              <tr>
+                <td colspan="6" style="text-align: center; color: #64748b; padding: 1rem;">
+                  กำลังรอการตรวจจับพิกัด...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>
